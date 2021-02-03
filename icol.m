@@ -2,6 +2,8 @@
 %%%%%%%%%% wavelength modulation
 clc; clear all;
 
+wbar= waitbar(0, 'Progress Bar');
+
 c=3e8;
 e=1.62e-19;
 h=6.62e-34;
@@ -15,8 +17,9 @@ count=1;
 
 
 for kkk=1:1:1
-    
-  for iii=1:1:2827
+  
+    n_omega= 2827;
+  for iii=1:1:n_omega
     
     omega=9.42e14+(iii-1)*0.005e14;
     lambda0=(2*3.14*c)./omega;
@@ -163,7 +166,7 @@ for kkk=1:1:1
     loss(count)=g;
     count=count+1;
     
-    progress=count/2827*100
+    waitbar(count/n_omega,wbar, sprintf('Progress: %.2f %%', (count*100/n_omega)));
     
   end
 
@@ -172,5 +175,5 @@ for kkk=1:1:1
   hold all
 
   count=1;
-
+  close(wbar);
 end
