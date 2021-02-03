@@ -39,18 +39,19 @@ for kkk=1:1:1
 
     Numords=101;    %%%%%%%%% number of diffractive orders maintained
     nc=1.64;        %%%%%%%%% region 1 cover refractive index
-    ns=1.33;           %%%%%%%%% region 3 substrate refractive index
-    Ngrat=3;        %%%%%%%%% number of grating slices
+    ns=1;           %%%%%%%%% region 3 substrate refractive index
+    Ngrat=4;        %%%%%%%%% number of grating slices
     period=1000e-9; %%%%%%%%% grating period in microns
 
-    nd=1.49;
+    nd1=1.49;
+    nd2= 1.33;
     nm=n2-1i*k2;
 
-    depth=[250e-9,300e-9,30e-9, 1000e-9];  %%%% Height for each grating
+    depth=[250e-9,50e-9,30e-9, 1000e-9];  %%%% Height for each grating
     j=sqrt(-1);
 
-    nr=[nm,nd,nm,ns];                %%%%%%%%%% Ridge refractive index for each grating
-    ng=[nd,nd,nm,ns];                %%%%%%%%%% index for ridge each grating
+    nr=[nm,nd1,nm,nd2];                %%%%%%%%%% Ridge refractive index for each grating
+    ng=[nd1,nd1,nm,nd2];                %%%%%%%%%% index for ridge each grating
     Filfac=[3/10 .5 .5 .5];           %%%%%%%%%% fill factor for ridges
     Disp=[0 0 0 0];                %%%%%%%%%% ridge displacement in a frac                                                                                                                                                                                                                                              tion of period
 
