@@ -14,15 +14,17 @@ h=6.62e-34;
 % deltaepsilon=1.09;
 
 count=1;
+runs=2;
 
-
-for kkk=1:1:1
+for kkk=1:1:runs
   
-    n_omega= 3000;
-  for iii=1:1:n_omega
+    n_angle= 300;
+    nd2= 1.32 + 0.01*kkk
+  for iii=1:1:n_angle
     
-    omega=18.84e14+(iii-1)*0.01e14;
-    lambda0=(2*3.14*c)./omega;
+%     omega=18.84e14+(iii-1)*0.01e14;
+%     lambda0=(2*3.14*c)./omega;
+    lambda0= 1550e-9;
     lambda(iii)=lambda0;
     lamdac=2.4511e-5;
     lamdap=1.0657e-7;
@@ -38,23 +40,25 @@ for kkk=1:1:1
     k22(iii)=k2;
 
     Numords=101;    %%%%%%%%% number of diffractive orders maintained
-    nc=1;        %%%%%%%%% region 1 cover refractive index
-    ns=1.542;           %%%%%%%%% region 3 substrate refractive index
+    nc=1.426;        %%%%%%%%% region 1 cover refractive index
+    ns=1;           %%%%%%%%% region 3 substrate refractive index
     Ngrat=3;        %%%%%%%%% number of grating slices
     period=400e-9; %%%%%%%%% grating period in microns
 
-    nd=1.33;
+    nd1=1.5;
+%     nd2=1.34;
     nm=n2-1i*k2;
 
-    depth=[250e-9,20e-9,20e-9];  %%%% Height for each grating
+    depth=[30e-9,0.65e-9,2000e-9];  %%%% Height for each grating
     j=sqrt(-1);
 
-    nr=[nd,nm,nm];                %%%%%%%%%% Ridge refractive index for each grating
-    ng=[nd,nd,nm];                %%%%%%%%%% index for ridge each grating
+    nr=[nm,nd1,nd2];                %%%%%%%%%% Ridge refractive index for each grating
+    ng=[nm,nd1,nd2];                %%%%%%%%%% index for ridge each grating
     Filfac=[.5 .5 .5 ];           %%%%%%%%%% fill factor for ridges
     Disp=[0 0 0 ];                %%%%%%%%%% ridge displacement in a frac                                                                                                                                                                                                                                              tion of period
 
-    theta0=0;                     %%%%%%%%%% angle of incidence
+    theta0=68 + (iii-1)*(6/n_angle);                     %%%%%%%%%% angle of incidence
+    theta(iii)= theta0;
     phi0=0;                       %%%%%%%%%% azimuthal angle of incidence
     deg=pi/180; 
 
@@ -166,14 +170,15 @@ for kkk=1:1:1
     loss(count)=g;
     count=count+1;
     
-    waitbar(count/n_omega,wbar, sprintf('Progress: %.2f %%', (count*100/n_omega)));
+    progress= ((kkk-1)*n_angle + count)/(runs*n_angle);
+    waitbar(progress,wbar, sprintf('Progress: %.2f %%', progress*100));
     
   end
 
   lambda=lambda.*10^9;
-  plot(lambda,IT12);
+  plot(theta,IR12);
   hold all
 
   count=1;
-  close(wbar);
 end
+close(wbar);
