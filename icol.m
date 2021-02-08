@@ -18,13 +18,6 @@ runs=2;
 
 for kkk=1:1:runs
   
-<<<<<<< HEAD
-    n_omega= 4000;
-  for iii=1:1:n_omega
-    
-    omega=10e14+(iii-1)*0.005e14;
-    lambda0=(2*3.14*c)./omega;
-=======
     n_angle= 300;
     nd2= 1.32 + 0.01*kkk
   for iii=1:1:n_angle
@@ -32,7 +25,6 @@ for kkk=1:1:runs
 %     omega=18.84e14+(iii-1)*0.01e14;
 %     lambda0=(2*3.14*c)./omega;
     lambda0= 1550e-9;
->>>>>>> master
     lambda(iii)=lambda0;
     lamdac=2.4511e-5;
     lamdap=1.0657e-7;
@@ -48,24 +40,6 @@ for kkk=1:1:runs
     k22(iii)=k2;
 
     Numords=101;    %%%%%%%%% number of diffractive orders maintained
-<<<<<<< HEAD
-    nc=1.64;        %%%%%%%%% region 1 cover refractive index
-    ns=1;           %%%%%%%%% region 3 substrate refractive index
-    Ngrat=4;        %%%%%%%%% number of grating slices
-    period=1000e-9; %%%%%%%%% grating period in microns
-
-    nd1=1.49;
-    nd2= 1.33;
-    nm=n2-1i*k2;
-
-    depth=[250e-9,50e-9,30e-9, 1000e-9];  %%%% Height for each grating
-    j=sqrt(-1);
-
-    nr=[nm,nd1,nm,nd2];                %%%%%%%%%% Ridge refractive index for each grating
-    ng=[nd1,nd1,nm,nd2];                %%%%%%%%%% index for ridge each grating
-    Filfac=[3/10 .5 .5 .5];           %%%%%%%%%% fill factor for ridges
-    Disp=[0 0 0 0];                %%%%%%%%%% ridge displacement in a frac                                                                                                                                                                                                                                              tion of period
-=======
     nc=1.426;        %%%%%%%%% region 1 cover refractive index
     ns=1;           %%%%%%%%% region 3 substrate refractive index
     Ngrat=3;        %%%%%%%%% number of grating slices
@@ -82,7 +56,6 @@ for kkk=1:1:runs
     ng=[nm,nd1,nd2];                %%%%%%%%%% index for ridge each grating
     Filfac=[.5 .5 .5 ];           %%%%%%%%%% fill factor for ridges
     Disp=[0 0 0 ];                %%%%%%%%%% ridge displacement in a frac                                                                                                                                                                                                                                              tion of period
->>>>>>> master
 
     theta0=68 + (iii-1)*(6/n_angle);                     %%%%%%%%%% angle of incidence
     theta(iii)= theta0;
@@ -203,11 +176,7 @@ for kkk=1:1:runs
   end
 
   lambda=lambda.*10^9;
-<<<<<<< HEAD
-  plot(lambda,IR12);
-=======
   plot(theta,IR12);
->>>>>>> master
   hold all
 
   count=1;
