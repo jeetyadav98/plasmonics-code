@@ -14,50 +14,44 @@ h=6.62e-34;
 % deltaepsilon=1.09;
 
 count=1;
-runs=2;
+runs=3;
 
+n_al= 260;
+t_al= linspace(15,40,n_al);
+t_al= t_al.*(10^-9);
+sens= zeros(1,n_al);
+
+lambda0= 1550e-9;
+nm= get_nm(lambda0);
+nGr= get_nGr(lambda0);
+
+params= zeros(runs,3,n_al);
+
+for thick=1:n_al
+    
 for kkk=1:1:runs
   
-    n_angle= 300;
-    nd2= 1.32 + 0.01*kkk
+  n_angle= 500;
+  nd= 1.31 + 0.01*kkk;
+  
   for iii=1:1:n_angle
     
-%     omega=18.84e14+(iii-1)*0.01e14;
-%     lambda0=(2*3.14*c)./omega;
-    lambda0= 1550e-9;
-    lambda(iii)=lambda0;
-    lamdac=2.4511e-5;
-    lamdap=1.0657e-7;
+    Numords=101;        %%%%%%%%% number of diffractive orders maintained
+    nc=1.426;           %%%%%%%%% region 1 cover refractive index
+    ns=1;               %%%%%%%%% region 3 substrate refractive index
+    Ngrat=3;            %%%%%%%%% number of grating slices
+    period=400e-9;      %%%%%%%%% grating period in microns
 
     
-    epsilonreal=1-((lambda0.^2.*(lamdac)^2)./(lamdap^2.*(lambda0.^2+lamdac^2)));
-    epsilonim=((lambda0.^3.*(lamdac))./(lamdap^2.*(lambda0.^2+lamdac^2)));
-    
-    n2=sqrt((sqrt(epsilonreal.^2+epsilonim.^2)+epsilonreal)./2);
-    k2=sqrt((sqrt(epsilonreal.^2+epsilonim.^2)-epsilonreal)./2);
-
-    n22(iii)=n2;
-    k22(iii)=k2;
-
-    Numords=101;    %%%%%%%%% number of diffractive orders maintained
-    nc=1.426;        %%%%%%%%% region 1 cover refractive index
-    ns=1;           %%%%%%%%% region 3 substrate refractive index
-    Ngrat=3;        %%%%%%%%% number of grating slices
-    period=400e-9; %%%%%%%%% grating period in microns
-
-    nd1=1.5;
-%     nd2=1.34;
-    nm=n2-1i*k2;
-
-    depth=[30e-9,0.65e-9,2000e-9];  %%%% Height for each grating
+    depth=[t_al(thick),0.34e-9,2000e-9];  %%%% Height for each grating
     j=sqrt(-1);
 
-    nr=[nm,nd1,nd2];                %%%%%%%%%% Ridge refractive index for each grating
-    ng=[nm,nd1,nd2];                %%%%%%%%%% index for ridge each grating
+    nr=[nm,nGr,nd];               %%%%%%%%%% Ridge refractive index for each grating
+    ng=[nm,nGr,nd];               %%%%%%%%%% index for ridge each grating
     Filfac=[.5 .5 .5 ];           %%%%%%%%%% fill factor for ridges
     Disp=[0 0 0 ];                %%%%%%%%%% ridge displacement in a frac                                                                                                                                                                                                                                              tion of period
 
-    theta0=68 + (iii-1)*(6/n_angle);                     %%%%%%%%%% angle of incidence
+    theta0= 65 + (iii-1)*(20/n_angle);                     %%%%%%%%%% angle of incidence
     theta(iii)= theta0;
     phi0=0;                       %%%%%%%%%% azimuthal angle of incidence
     deg=pi/180; 
@@ -170,15 +164,74 @@ for kkk=1:1:runs
     loss(count)=g;
     count=count+1;
     
-    progress= ((kkk-1)*n_angle + count)/(runs*n_angle);
+    progress= ((thick-1)*runs*n_angle +(kkk-1)*n_angle + count)/(runs*n_angle*n_al);
     waitbar(progress,wbar, sprintf('Progress: %.2f %%', progress*100));
     
   end
 
-  lambda=lambda.*10^9;
-  plot(theta,IR12);
-  hold all
+%   plot(theta,IR12);
+%   hold all
 
+  [params(kkk,1,thick), params(kkk,2,thick), params(kkk,3,thick)]= get_params(theta,IR12);
   count=1;
 end
+  
+end
 close(wbar);
+
+function [dip_max, dip_angle, fwhm]= get_params(theta,IR12)
+ [dip_max,index]= min(IR12);
+ dip_angle= theta(index);
+ 
+ halfMax = (min(IR12) + max(IR12)) / 2;
+ 
+ % Find where the data first drops below half the max.
+ index1 = find(IR12 <= halfMax, 1, 'first');
+ % Find where the data last rises above half the max.
+ index2 = find(IR12 <= halfMax, 1, 'last');
+ 
+ fwhm= theta(index2) - theta(index1);
+end
+
+function nGr= get_nGr(lambda0)
+c=3e8;
+q=1.62e-19;
+muc=(0*q);
+ep=8.85e-12;
+thick=0.34e-9;
+Kb=1.38e-23;
+h=6.62e-34;
+h1=h/(2*3.14);
+T=300;
+t=0.1e-12;
+
+omega= (2*pi*c)/(lambda0);
+
+a=q^2/(4*h1);
+b=(1/3.14).*atan(((h1.*omega)-(2.*muc))./(2.*Kb.*T));
+c1=(1/(2*3.14)).*log(((h1.*omega)+(2.*muc)).^2./(((h1.*omega)-(2.*muc)).^2.+(2.*Kb.*T)^2));
+d=(q.^2.*Kb.*T)/((h1.^2.*3.14).*(omega+1i./t));
+e=cosh(muc./(2.*Kb.*T));
+sigma=a.*(((0.5+b)-1i.*c1))+2.*1i.*d.*log(e);
+epsilon=1+((1i.*sigma)./(omega.*ep.*thick));
+Refra=sqrt(epsilon);
+n4=real(Refra);
+k4=imag(Refra);
+ngr=n4-1i*k4;
+
+nGr= ngr;
+end
+
+function nm= get_nm(lambda0)
+lamdac=2.4511e-5;
+lamdap=1.0657e-7;
+
+    
+epsilonreal=1-((lambda0.^2.*(lamdac)^2)./(lamdap^2.*(lambda0.^2+lamdac^2)));
+epsilonim=((lambda0.^3.*(lamdac))./(lamdap^2.*(lambda0.^2+lamdac^2)));
+    
+n2=sqrt((sqrt(epsilonreal.^2+epsilonim.^2)+epsilonreal)./2);
+k2=sqrt((sqrt(epsilonreal.^2+epsilonim.^2)-epsilonreal)./2);
+
+nm= n2 - j*k2;
+end
