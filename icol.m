@@ -16,43 +16,69 @@ h=6.62e-34;
 count=1;
 runs=3;
 
-n_al= 260;
-t_al= linspace(15,40,n_al);
-t_al= t_al.*(10^-9);
-sens= zeros(1,n_al);
+n_g=20; t_g= linspace(30e-9,50e-9,n_g);
+n_bg=20; t_bg= linspace(25e-9,45e-9,n_g);
+n_m=20; t_m= linspace(25e-9,35e-9,n_g);
+
+% Counter values
+c_g=0; c_bg=0; c_m=0;
+
+dims= [t_g;t_bg;t_m];
 
 lambda0= 1550e-9;
-nm= get_nm(lambda0);
-nGr= get_nGr(lambda0);
 
-params= zeros(runs,3,n_al);
 
-for thick=1:n_al
+params= zeros(runs,3,n_g*n_bg*n_m);
+
+for dim=1:n_g*n_bg*n_m
+    
+    %startcounter action
+    if(mod(c_g,n_g)==0 & mod(c_bg,n_bg)==0)
+        c_m= c_m + 1;
+        c_bg=1;
+        c_g=1;
+    elseif(mod(c_g,n_g)==0)
+        c_bg= c_bg +1;
+        c_g=1;
+    else
+        c_g= c_g +1;
+    end
+    %%%%endcounter
+    [c_g,c_bg,c_m]
     
 for kkk=1:1:runs
   
-  n_angle= 500;
-  nd= 1.31 + 0.01*kkk;
+  n_l= 150;
+  nd2= 1.31 + 0.01*kkk; % analyte
   
-  for iii=1:1:n_angle
+  lambda= zeros(1,n_l);
+  
+  for iii=1:1:n_l
+    
+    lambda0= 1300e-9 + (iii-1)*(100e-9/n_l);
+    lambda(iii)= lambda0;
     
     Numords=101;        %%%%%%%%% number of diffractive orders maintained
     nc=1.426;           %%%%%%%%% region 1 cover refractive index
     ns=1;               %%%%%%%%% region 3 substrate refractive index
-    Ngrat=3;            %%%%%%%%% number of grating slices
-    period=400e-9;      %%%%%%%%% grating period in microns
+    Ngrat=5;            %%%%%%%%% number of grating slices
+    period=1000e-9;      %%%%%%%%% grating period in microns
 
-    
-    depth=[t_al(thick),0.34e-9,2000e-9];  %%%% Height for each grating
+    nm= get_nm(lambda0);
+    nGr= get_nGr(lambda0);
+    nd1=1.49;
+
+%     depth=[t_g(c_g),t_bg(c_bg),t_m(c_m),0.34e-9,2000e-9];  %%%% Height for each grating
+    depth=[40e-9,35e-9,25e-9,0.34e-9,2000e-9];  %%%% Height for each grating
     j=sqrt(-1);
 
-    nr=[nm,nGr,nd];               %%%%%%%%%% Ridge refractive index for each grating
-    ng=[nm,nGr,nd];               %%%%%%%%%% index for ridge each grating
-    Filfac=[.5 .5 .5 ];           %%%%%%%%%% fill factor for ridges
-    Disp=[0 0 0 ];                %%%%%%%%%% ridge displacement in a frac                                                                                                                                                                                                                                              tion of period
+    nr=[nm,nd1,nm,nGr,nd2];                %%%%%%%%%% Ridge refractive index for each grating
+    ng=[nd1,nd1,nm,nGr,nd2];                %%%%%%%%%% index for ridge each grating
+    Filfac=[.3 .5 .5 .5 .5 ];           %%%%%%%%%% fill factor for ridges
+    Disp=[0 0 0 0 0];                %%%%%%%%%% ridge displacement in a fraction of period
 
-    theta0= 65 + (iii-1)*(20/n_angle);                     %%%%%%%%%% angle of incidence
-    theta(iii)= theta0;
+    theta0= 0;                  %%%%%%%%%% angle of incidence
+%     theta(iii)= theta0;
     phi0=0;                       %%%%%%%%%% azimuthal angle of incidence
     deg=pi/180; 
 
@@ -164,24 +190,24 @@ for kkk=1:1:runs
     loss(count)=g;
     count=count+1;
     
-    progress= ((thick-1)*runs*n_angle +(kkk-1)*n_angle + count)/(runs*n_angle*n_al);
+    progress= ((dim-1)*runs*n_l + (kkk-1)*n_l + count)/(runs*n_l*n_bg*n_g*n_m);
     waitbar(progress,wbar, sprintf('Progress: %.2f %%', progress*100));
     
   end
 
-%   plot(theta,IR12);
-%   hold all
+  plot(lambda,IR12);
+  hold all
 
-  [params(kkk,1,thick), params(kkk,2,thick), params(kkk,3,thick)]= get_params(theta,IR12);
+  [params(kkk,1,dim), params(kkk,2,dim), params(kkk,3,dim)]= get_params(lambda,IR12);
   count=1;
 end
   
 end
 close(wbar);
 
-function [dip_max, dip_angle, fwhm]= get_params(theta,IR12)
+function [dip_max, dip_wv, fwhm]= get_params(lambda,IR12)
  [dip_max,index]= min(IR12);
- dip_angle= theta(index);
+ dip_wv= lambda(index);
  
  halfMax = (min(IR12) + max(IR12)) / 2;
  
@@ -190,7 +216,7 @@ function [dip_max, dip_angle, fwhm]= get_params(theta,IR12)
  % Find where the data last rises above half the max.
  index2 = find(IR12 <= halfMax, 1, 'last');
  
- fwhm= theta(index2) - theta(index1);
+ fwhm= lambda(index2) - lambda(index1);
 end
 
 function nGr= get_nGr(lambda0)
