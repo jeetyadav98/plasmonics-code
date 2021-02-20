@@ -1,6 +1,7 @@
 %%%%%%%%%% for tm binary grating glass metal  metalgrating dielectric
 %%%%%%%%%% wavelength modulation
 clc; clear all;
+tic
 
 wbar= waitbar(0, 'Progress Bar');
 
@@ -16,17 +17,14 @@ h=6.62e-34;
 count=1;
 runs=3;
 
-n_g=20; t_g= linspace(30e-9,50e-9,n_g);
-n_bg=20; t_bg= linspace(25e-9,45e-9,n_g);
-n_m=20; t_m= linspace(25e-9,35e-9,n_g);
+n_g=11; t_g= linspace(30e-9,50e-9,n_g);
+n_bg=11; t_bg= linspace(25e-9,45e-9,n_g);
+n_m=11; t_m= linspace(15e-9,35e-9,n_g);
 
 % Counter values
 c_g=0; c_bg=0; c_m=0;
 
 dims= [t_g;t_bg;t_m];
-
-lambda0= 1550e-9;
-
 
 params= zeros(runs,3,n_g*n_bg*n_m);
 
@@ -44,7 +42,6 @@ for dim=1:n_g*n_bg*n_m
         c_g= c_g +1;
     end
     %%%%endcounter
-    [c_g,c_bg,c_m]
     
 for kkk=1:1:runs
   
@@ -68,8 +65,8 @@ for kkk=1:1:runs
     nGr= get_nGr(lambda0);
     nd1=1.49;
 
-%     depth=[t_g(c_g),t_bg(c_bg),t_m(c_m),0.34e-9,2000e-9];  %%%% Height for each grating
-    depth=[40e-9,35e-9,25e-9,0.34e-9,2000e-9];  %%%% Height for each grating
+    depth=[t_g(c_g),t_bg(c_bg),t_m(c_m),0.34e-9,2000e-9];  %%%% Height for each grating
+%     depth=[40e-9,37e-9,25e-9,0.34e-9,2000e-9];  %%%% Height for each grating
     j=sqrt(-1);
 
     nr=[nm,nd1,nm,nGr,nd2];                %%%%%%%%%% Ridge refractive index for each grating
@@ -191,12 +188,13 @@ for kkk=1:1:runs
     count=count+1;
     
     progress= ((dim-1)*runs*n_l + (kkk-1)*n_l + count)/(runs*n_l*n_bg*n_g*n_m);
-    waitbar(progress,wbar, sprintf('Progress: %.2f %%', progress*100));
+    waitbar(progress,wbar, sprintf('\n Progress: %.4f %% ---- Counter: %i-%i-%i',...
+                                    progress*100, c_m, c_bg, c_g));
     
   end
 
-  plot(lambda,IR12);
-  hold all
+%   plot(lambda,IR12);
+%   hold all
 
   [params(kkk,1,dim), params(kkk,2,dim), params(kkk,3,dim)]= get_params(lambda,IR12);
   count=1;
@@ -204,6 +202,7 @@ end
   
 end
 close(wbar);
+toc
 
 function [dip_max, dip_wv, fwhm]= get_params(lambda,IR12)
  [dip_max,index]= min(IR12);
@@ -259,5 +258,5 @@ epsilonim=((lambda0.^3.*(lamdac))./(lamdap^2.*(lambda0.^2+lamdac^2)));
 n2=sqrt((sqrt(epsilonreal.^2+epsilonim.^2)+epsilonreal)./2);
 k2=sqrt((sqrt(epsilonreal.^2+epsilonim.^2)-epsilonreal)./2);
 
-nm= n2 - j*k2;
+nm= n2 - 1i*k2;
 end
